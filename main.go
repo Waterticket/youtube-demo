@@ -7,6 +7,7 @@ import (
 	"os/signal"
 
 	"github.com/labstack/echo/v4"
+	echoSwagger "github.com/swaggo/echo-swagger"
 
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
@@ -32,10 +33,10 @@ func main() {
 	fmt.Println("Connected to:", version)
 
 	e = echo.New()
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
-	e.Logger.Fatal(e.Start(":1323"))
+	e.GET("/", index)
+
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
+	e.Logger.Fatal(e.Start(":8080"))
 
 	sig := make(chan os.Signal)
 	signal.Notify(sig, os.Interrupt)
@@ -48,4 +49,8 @@ forever:
 			break forever
 		}
 	}
+}
+
+func index(c echo.Context) error {
+	return c.String(http.StatusOK, "Hello, World!")
 }
