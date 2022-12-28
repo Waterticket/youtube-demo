@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/gommon/log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -33,9 +35,21 @@ func main() {
 	fmt.Println("Connected to:", version)
 
 	e = echo.New()
+	e.Logger.SetLevel(log.DEBUG)
+	e.Pre(middleware.RemoveTrailingSlash())
+	e.Use(middleware.Logger())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
+	}))
 	e.GET("/", index)
-
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
+
+	e.GET("/upload", uploadView)
+	e.POST("/upload/metadata", uploadMetadata)
+	e.POST("/upload/video/:id", uploadVideo)
+
 	e.Logger.Fatal(e.Start(":8080"))
 
 	sig := make(chan os.Signal)
