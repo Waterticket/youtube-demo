@@ -2,8 +2,10 @@ package main
 
 import (
 	"github.com/labstack/echo/v4"
+	"log"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type Video struct {
@@ -36,7 +38,53 @@ func uploadMetadata(c echo.Context) error {
 }
 
 func uploadVideo(c echo.Context) error {
-	id, _ := strconv.Atoi(c.Param("id"))
+	id := c.Param("id")
 
-	return c.String(http.StatusOK, strconv.Itoa(id))
+	// get range
+	rangeHeader := c.Request().Header.Get("Content-Range")
+	if rangeHeader == "" {
+		return c.String(http.StatusBadRequest, "Content-Range header is missing")
+	}
+
+	// parse range
+	rangeParts := strings.Split(rangeHeader, " ")
+	if len(rangeParts) != 2 {
+		return c.String(http.StatusBadRequest, "Content-Range header is invalid")
+	}
+
+	rangeParts = strings.Split(rangeParts[1], "/")
+	if len(rangeParts) != 2 {
+		return c.String(http.StatusBadRequest, "Content-Range header is invalid")
+	}
+
+	maxBytes, _ := strconv.Atoi(rangeParts[1])
+	if maxBytes == 4*1024*1024*1024 {
+		return c.String(http.StatusBadRequest, "File size should be less than 4GB")
+	}
+
+	rangeParts = strings.Split(rangeParts[0], "-")
+	if len(rangeParts) != 2 {
+		return c.String(http.StatusBadRequest, "Content-Range header is invalid")
+	}
+
+	startByte, _ := strconv.Atoi(rangeParts[0])
+	endByte, _ := strconv.Atoi(rangeParts[1])
+
+	file, err := c.FormFile("file")
+	if err != nil {
+		return err
+	}
+	src, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	targetLocation := "files/videos/" + id + ".mp4"
+	if err = writeFile(id, startByte, endByte, maxBytes, src, targetLocation); err != nil {
+		log.Println(err)
+		return c.String(http.StatusInternalServerError, "Error while creating file")
+	}
+
+	return c.String(http.StatusOK, id)
 }

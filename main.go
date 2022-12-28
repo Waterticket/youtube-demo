@@ -49,6 +49,7 @@ func main() {
 	e.GET("/upload", uploadView)
 	e.POST("/upload/metadata", uploadMetadata)
 	e.POST("/upload/video/:id", uploadVideo)
+	e.PUT("/upload/video/:id", uploadVideo)
 
 	e.Logger.Fatal(e.Start(":8080"))
 
