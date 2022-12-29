@@ -21,9 +21,15 @@ type RedisConfig struct {
 	Addr string `yaml:"Addr"`
 }
 
+type TranscodeConfig struct {
+	FFmpegPath     string `yaml:"FFmpegPath"`
+	TranscodeCount int    `yaml:"TranscodeCount"`
+}
+
 type Config struct {
-	Mysql MysqlConfig `yaml:"Mysql"`
-	Redis RedisConfig `yaml:"Redis"`
+	Mysql     MysqlConfig     `yaml:"Mysql"`
+	Redis     RedisConfig     `yaml:"Redis"`
+	Transcode TranscodeConfig `yaml:"Transcode"`
 }
 
 func configInit() {

@@ -6,3 +6,7 @@ Mysql:
 
 Redis:
   Addr: "localhost:6379"
+
+Transcode:
+  TranscodeCount: 2
+  FFmpegPath: "/usr/bin/ffmpeg"

@@ -1,8 +1,0 @@
-Mysql:
-  Addr: "localhost:3307"
-  Username: "root"
-  Password: "password"
-  Database: "ytdemo"
-
-Redis:
-  Addr: "localhost:6379"
