@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/adjust/rmq/v5"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
 	"net/http"
@@ -18,10 +19,13 @@ import (
 var (
 	db *sql.DB
 	e  *echo.Echo
+
+	connection rmq.Connection
 )
 
 func main() {
 	var err error
+	// mysql
 	db, err = sql.Open("mysql", "root:password@tcp(127.0.0.1:3307)/ytdemo")
 	defer db.Close()
 
@@ -34,6 +38,19 @@ func main() {
 	db.QueryRow("SELECT VERSION()").Scan(&version)
 	fmt.Println("Connected to:", version)
 
+	// rmq
+	errChan := make(chan error, 1)
+	connection, err = rmq.OpenConnection("rmq", "tcp", "localhost:6379", 1, errChan)
+	if err != nil {
+		panic(err)
+	}
+
+	// transcode queue
+	if err = transcodeQueueInit(connection); err != nil {
+		panic(err)
+	}
+
+	// echo
 	e = echo.New()
 	e.Logger.SetLevel(log.DEBUG)
 	e.Pre(middleware.RemoveTrailingSlash())
@@ -61,6 +78,10 @@ forever:
 		select {
 		case <-sig:
 			fmt.Println("signal received, stopping")
+			break forever
+
+		case err := <-errChan:
+			fmt.Println("error received, stopping", err)
 			break forever
 		}
 	}
