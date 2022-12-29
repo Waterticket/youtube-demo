@@ -30,6 +30,9 @@ func writeFile(id string, startByte int, endByte int, maxBytes int, src io.Reade
 			return err
 		}
 
+		if fileHandler == nil {
+			fileHandler = make([]*os.File, 1000)
+		}
 		fileHandler[idseq] = file
 	}
 
