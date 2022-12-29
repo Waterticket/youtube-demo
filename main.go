@@ -41,7 +41,7 @@ func main() {
 
 	// rmq
 	errChan := make(chan error, 1)
-	connection, err = rmq.OpenConnection("rmq", "tcp", "localhost:6379", 1, errChan)
+	connection, err = rmq.OpenConnection("rmq", "tcp", config.Redis.Addr, 1, errChan)
 	if err != nil {
 		panic(err)
 	}
