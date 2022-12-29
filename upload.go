@@ -9,7 +9,7 @@ import (
 )
 
 type Video struct {
-	ID           int    `json:"id"`
+	ID           int64  `json:"id"`
 	Title        string `json:"title"`
 	Description  string `json:"description"`
 	FileLocation string `json:"file_location"`
@@ -28,13 +28,20 @@ func uploadMetadata(c echo.Context) error {
 	}
 
 	if video.ID == 0 {
-		db.QueryRow("INSERT INTO videos (title, description, file_location, status, upload_date) VALUES (?, ?, ?, ?, ?)", video.Title, video.Description, video.FileLocation, video.Status, video.UploadDate)
-		db.QueryRow("SELECT LAST_INSERT_ID()").Scan(&video.ID)
+		res, err := db.Exec("INSERT INTO videos (title, description, file_location, status) VALUES (?, ?, ?, ?)", video.Title, video.Description, video.FileLocation, video.Status)
+		if err != nil {
+			return SendMessage(c, http.StatusInternalServerError, 500, err.Error(), nil)
+		}
+
+		video.ID, _ = res.LastInsertId()
+		if err != nil {
+			return SendMessage(c, http.StatusInternalServerError, 500, err.Error(), nil)
+		}
 	} else {
 		db.QueryRow("UPDATE videos SET title = ?, description = ?, file_location = ?, status = ?, upload_date = ? WHERE id = ?", video.Title, video.Description, video.FileLocation, video.Status, video.UploadDate, video.ID)
 	}
 
-	return c.JSON(http.StatusOK, video)
+	return SendMessage(c, http.StatusOK, 200, "success", video)
 }
 
 func uploadVideo(c echo.Context) error {

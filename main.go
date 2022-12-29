@@ -100,3 +100,11 @@ type Message struct {
 	Message string      `json:"message"`
 	Data    interface{} `json:"data"`
 }
+
+func SendMessage(c echo.Context, httpStatus int, status int, message string, data interface{}) error {
+	return c.JSON(httpStatus, Message{
+		Status:  status,
+		Message: message,
+		Data:    data,
+	})
+}
