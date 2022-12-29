@@ -50,28 +50,28 @@ func uploadVideo(c echo.Context) error {
 	// get range
 	rangeHeader := c.Request().Header.Get("Content-Range")
 	if rangeHeader == "" {
-		return c.String(http.StatusBadRequest, "Content-Range header is missing")
+		return SendMessage(c, http.StatusBadRequest, 400, "Content-Range header is missing", nil)
 	}
 
 	// parse range
 	rangeParts := strings.Split(rangeHeader, " ")
 	if len(rangeParts) != 2 {
-		return c.String(http.StatusBadRequest, "Content-Range header is invalid")
+		return SendMessage(c, http.StatusBadRequest, 400, "Content-Range header is invalid", nil)
 	}
 
 	rangeParts = strings.Split(rangeParts[1], "/")
 	if len(rangeParts) != 2 {
-		return c.String(http.StatusBadRequest, "Content-Range header is invalid")
+		return SendMessage(c, http.StatusBadRequest, 400, "Content-Range header is invalid", nil)
 	}
 
 	maxBytes, _ := strconv.Atoi(rangeParts[1])
 	if maxBytes == 4*1024*1024*1024 {
-		return c.String(http.StatusBadRequest, "File size should be less than 4GB")
+		return SendMessage(c, http.StatusBadRequest, 400, "File size should be less than 4GB", nil)
 	}
 
 	rangeParts = strings.Split(rangeParts[0], "-")
 	if len(rangeParts) != 2 {
-		return c.String(http.StatusBadRequest, "Content-Range header is invalid")
+		return SendMessage(c, http.StatusBadRequest, 400, "Content-Range header is invalid", nil)
 	}
 
 	startByte, _ := strconv.Atoi(rangeParts[0])
@@ -90,7 +90,7 @@ func uploadVideo(c echo.Context) error {
 	targetLocation := "files/pending/vid_" + id
 	if err = writeFile(id, startByte, endByte, maxBytes, src, targetLocation); err != nil {
 		log.Println(err)
-		return c.String(http.StatusInternalServerError, "Error while creating file")
+		return SendMessage(c, http.StatusInternalServerError, 500, err.Error(), nil)
 	}
 
 	if endByte == maxBytes {
@@ -98,5 +98,5 @@ func uploadVideo(c echo.Context) error {
 		transcodeQueuePush(id)
 	}
 
-	return c.String(http.StatusOK, id)
+	return SendMessage(c, http.StatusOK, 200, "success", nil)
 }
