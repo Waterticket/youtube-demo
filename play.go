@@ -15,6 +15,7 @@ func videoList(c echo.Context) error {
 		messageJson, _ := json.Marshal(message)
 		return c.String(http.StatusInternalServerError, string(messageJson))
 	}
+	defer rows.Close()
 
 	videos := make([]Video, 0)
 
