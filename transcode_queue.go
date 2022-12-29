@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/adjust/rmq/v5"
 	"log"
@@ -65,11 +66,13 @@ func (consumer *Consumer) Consume(delivery rmq.Delivery) {
 	success := true
 	origin := fmt.Sprintf("files/pending/vid_%s", id)
 	target := fmt.Sprintf("files/videos/vid_%s.mp4", id)
-	command := fmt.Sprintf(config.Transcode.TranscodeCommandLine, origin, target)
 
-	cmd := exec.Command(config.Transcode.FFmpegPath, command)
+	cmd := exec.Command(config.Transcode.FFmpegPath, "-i", origin, "-c:v", "libx264", "-crf", "18", "-c:a", "aac", "-b:a", "128k", "-ac", "2", "-f", "mp4", target)
+	var outb, errb bytes.Buffer
+	cmd.Stdout = &outb
+	cmd.Stderr = &errb
 	if err := cmd.Run(); err != nil {
-		log.Printf("transcode %s failed: %s", id, err)
+		log.Printf("transcode %s failed: %s", id, errb.String())
 		success = false
 	}
 
