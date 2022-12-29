@@ -32,8 +32,7 @@ func main() {
 	defer db.Close()
 
 	if err != nil {
-		fmt.Println("MYSQL Connect Failed: ", err)
-		os.Exit(0)
+		panic(err)
 	}
 
 	var version string
@@ -97,7 +96,7 @@ func index(c echo.Context) error {
 }
 
 type Message struct {
-	status  int         `json:"status"`
-	message string      `json:"message"`
-	data    interface{} `json:"data"`
+	Status  int         `json:"status"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
 }

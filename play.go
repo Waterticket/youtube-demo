@@ -10,8 +10,8 @@ func videoList(c echo.Context) error {
 	message := new(Message)
 	rows, err := db.Query("SELECT * FROM videos")
 	if err != nil {
-		message.status = 500
-		message.message = err.Error()
+		message.Status = 500
+		message.Message = err.Error()
 		messageJson, _ := json.Marshal(message)
 		return c.String(http.StatusInternalServerError, string(messageJson))
 	}
@@ -24,8 +24,8 @@ func videoList(c echo.Context) error {
 
 		err = rows.Scan(&video.ID, &video.Title, &video.Description, &video.FileLocation, &video.Status, &video.UploadDate)
 		if err != nil {
-			message.status = 500
-			message.message = err.Error()
+			message.Status = 500
+			message.Message = err.Error()
 			messageJson, _ := json.Marshal(message)
 			return c.String(http.StatusInternalServerError, string(messageJson))
 		}
@@ -33,9 +33,9 @@ func videoList(c echo.Context) error {
 		videos = append(videos, video)
 	}
 
-	message.status = 200
-	message.message = "success"
-	message.data = videos
+	message.Status = 200
+	message.Message = "success"
+	message.Data = videos
 	messageJson, _ := json.Marshal(message)
 	return c.String(http.StatusOK, string(messageJson))
 }
@@ -47,15 +47,15 @@ func videoView(c echo.Context) error {
 	var video Video
 	err := db.QueryRow("SELECT * FROM videos WHERE id = ?", id).Scan(&video.ID, &video.Title, &video.Description, &video.FileLocation, &video.Status, &video.UploadDate)
 	if err != nil {
-		message.status = 500
-		message.message = err.Error()
+		message.Status = 500
+		message.Message = err.Error()
 		messageJson, _ := json.Marshal(message)
 		return c.String(http.StatusInternalServerError, string(messageJson))
 	}
 
-	message.status = 200
-	message.message = "success"
-	message.data = video
+	message.Status = 200
+	message.Message = "success"
+	message.Data = video
 	messageJson, _ := json.Marshal(message)
 	return c.String(http.StatusOK, string(messageJson))
 }
