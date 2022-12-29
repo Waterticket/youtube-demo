@@ -70,6 +70,9 @@ func main() {
 	e.POST("/upload/video/:id", uploadVideo)
 	e.PUT("/upload/video/:id", uploadVideo)
 
+	e.GET("/videos", videoList)
+	e.GET("/video/:id", videoView)
+
 	e.Logger.Fatal(e.Start(":8080"))
 
 	sig := make(chan os.Signal)
@@ -91,4 +94,10 @@ forever:
 
 func index(c echo.Context) error {
 	return c.String(http.StatusOK, "Hello, World!")
+}
+
+type Message struct {
+	status  int         `json:"status"`
+	message string      `json:"message"`
+	data    interface{} `json:"data"`
 }
