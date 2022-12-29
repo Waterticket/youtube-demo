@@ -91,4 +91,6 @@ fabric.properties
 
 files/*
 
+config.yaml
+
 # End of https://www.toptal.com/developers/gitignore/api/intellij+all

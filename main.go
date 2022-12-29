@@ -24,9 +24,11 @@ var (
 )
 
 func main() {
+	configInit()
+
 	var err error
 	// mysql
-	db, err = sql.Open("mysql", "root:password@tcp(127.0.0.1:3307)/ytdemo")
+	db, err = sql.Open("mysql", config.Mysql.Username+":"+config.Mysql.Password+"@tcp("+config.Mysql.Addr+")/"+config.Mysql.Database+"?charset=utf8mb4&parseTime=True&loc=Local")
 	defer db.Close()
 
 	if err != nil {
