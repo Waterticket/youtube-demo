@@ -80,14 +80,14 @@ func uploadVideo(c echo.Context) error {
 	}
 	defer src.Close()
 
-	targetLocation := "files/videos/vid_" + id
+	targetLocation := "files/pending/vid_" + id
 	if err = writeFile(id, startByte, endByte, maxBytes, src, targetLocation); err != nil {
 		log.Println(err)
 		return c.String(http.StatusInternalServerError, "Error while creating file")
 	}
 
 	if endByte == maxBytes {
-		db.QueryRow("UPDATE videos SET status = 'uploaded' WHERE id = ?", id)
+		db.QueryRow("UPDATE videos SET status = 'transcode_pending' WHERE id = ?", id)
 		transcodeQueuePush(id)
 	}
 

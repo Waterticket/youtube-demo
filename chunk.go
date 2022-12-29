@@ -81,6 +81,13 @@ func checkDirectory() error {
 		}
 	}
 
+	if _, err := os.Stat("files/pending"); os.IsNotExist(err) {
+		err := os.Mkdir("files/pending", 0777)
+		if err != nil {
+			return err
+		}
+	}
+
 	if _, err := os.Stat("files/videos"); os.IsNotExist(err) {
 		err := os.Mkdir("files/videos", 0777)
 		if err != nil {

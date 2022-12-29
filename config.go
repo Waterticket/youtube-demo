@@ -22,8 +22,9 @@ type RedisConfig struct {
 }
 
 type TranscodeConfig struct {
-	FFmpegPath     string `yaml:"FFmpegPath"`
-	TranscodeCount int    `yaml:"TranscodeCount"`
+	FFmpegPath        string `yaml:"FFmpegPath"`
+	FFmpegCommandLine string `yaml:"FFmpegCommandLine"`
+	TranscodeCount    int64  `yaml:"TranscodeCount"`
 }
 
 type Config struct {
