@@ -10,4 +10,4 @@ Redis:
 Transcode:
   TranscodeCount: 2
   FFmpegPath: "/usr/bin/ffmpeg"
-  FFmpegCommandLine: "-i %s -c:v libx264 -crf 18 -c:a aac -b:a 128k -ac 2 -f mp4 %s"
+  TranscodeCommandLine: "-i %s -c:v libx264 -crf 18 -c:a aac -b:a 128k -ac 2 -f mp4 %s"

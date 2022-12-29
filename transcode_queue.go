@@ -65,7 +65,7 @@ func (consumer *Consumer) Consume(delivery rmq.Delivery) {
 	success := true
 	origin := fmt.Sprintf("files/pending/vid_%s", id)
 	target := fmt.Sprintf("files/videos/vid_%s.mp4", id)
-	command := fmt.Sprintf(config.Transcode.FFmpegCommandLine, origin, target)
+	command := fmt.Sprintf(config.Transcode.TranscodeCommandLine, origin, target)
 
 	cmd := exec.Command(config.Transcode.FFmpegPath, command)
 	if err := cmd.Run(); err != nil {
