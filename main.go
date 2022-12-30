@@ -72,7 +72,7 @@ func main() {
 	e.GET("/videos", videoList)
 	e.GET("/video/:id", videoView)
 
-	e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(config.Server.Addr))
 
 	sig := make(chan os.Signal)
 	signal.Notify(sig, os.Interrupt)
