@@ -110,6 +110,7 @@ func (consumer *Consumer) Consume(delivery rmq.Delivery) {
 	target := directory + "/stream_%v.m3u8"
 	tsFileName := directory + "/vid_%v_%03d.ts"
 	masterFileName := "vid.m3u8"
+	thumbnailFileName := directory + "/thumbnail.jpg"
 
 	success := make(chan bool, 0)
 	failed := make(chan bool, 0)
@@ -150,7 +151,7 @@ func (consumer *Consumer) Consume(delivery rmq.Delivery) {
 	log.Printf("directory %s created", directory)
 
 	var outb, errb bytes.Buffer
-	cmd := exec.Command("ffprobe", "-i", origin, "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height,r_frame_rate", "-show_entries", "format=duration", "-print_format", "json")
+	cmd := exec.Command(config.Transcode.FFprobePath, "-i", origin, "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height,r_frame_rate", "-show_entries", "format=duration", "-print_format", "json")
 	cmd.Stdout = &outb
 	cmd.Stderr = &errb
 	if err := cmd.Run(); err != nil {
@@ -173,6 +174,23 @@ func (consumer *Consumer) Consume(delivery rmq.Delivery) {
 	db.QueryRow("UPDATE videos SET width = ?, height = ?, duration = ? WHERE id = ?", width, height, int(math.Round(videoInfo.getDuration())), id)
 	outb.Reset()
 	errb.Reset()
+
+	// get thumbnail
+
+	cmd = exec.Command(config.Transcode.FFmpegPath, "-i", origin, "-vframes", "1", "-vf", "thumbnail=50", thumbnailFileName)
+	cmd.Stdout = &outb
+	cmd.Stderr = &errb
+	if err := cmd.Run(); err != nil {
+		log.Printf("generate thumbnail %s failed: %s", id, errb.String())
+		failed <- true
+		return
+	}
+
+	log.Printf("generate thumbnail %s success", id)
+	outb.Reset()
+	errb.Reset()
+
+	// transcode
 
 	var ffmpegArgs []string
 	var filter string
@@ -262,7 +280,8 @@ func (consumer *Consumer) Consume(delivery rmq.Delivery) {
 	cmd = exec.Command(config.Transcode.FFmpegPath, ffmpegArgs...)
 	cmd.Stdout = &outb
 	cmd.Stderr = &errb
-	log.Printf("command line: %s", cmd.String())
+	log.Printf("transcode command line: %s", cmd.String())
+	log.Println("run transcode")
 
 	if err := cmd.Run(); err != nil {
 		log.Printf("transcode %s failed: %s", id, errb.String())
